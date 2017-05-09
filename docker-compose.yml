@@ -1,0 +1,32 @@
+version: '2'
+services:
+  web:
+    build: .
+    image: registry.plat2.leonidasoy.fi/leonidas-platform-manager
+    command: scripts/wait-for-it.sh --strict postgres:5432 -- python manage.py docker_start
+    ports:
+      - 8000:8000
+    links:
+      - postgres
+      - memcache
+    volumes:
+      - ./cmdb:/usr/src/app/cmdb
+      - ./manager_site:/usr/src/app/manager_site
+    environment:
+      DEBUG: 1
+      PYTHONUNBUFFERED: 1
+      DATABASE_URL: psql://platform:platform@postgres/platform
+      ALLOWED_HOSTS: '*'
+      CACHE_URL: memcache://memcache
+  postgres:
+    image: postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: platform
+      POSTGRES_PASSWORD: platform
+      POSTGRES_DB: platform
+  memcache:
+    image: memcached
+volumes:
+  postgres-data: {}
