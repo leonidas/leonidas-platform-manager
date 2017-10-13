@@ -12,6 +12,8 @@ class Command(BaseCommand):
 
         if settings.DEBUG:
             from django.contrib.auth import get_user_model
+            from ...models.service import ROLE_CHOICES, Service
+
             User = get_user_model()
 
             superuser, created = User.objects.get_or_create(
@@ -26,3 +28,7 @@ class Command(BaseCommand):
             if created:
                 superuser.set_password('secret')
                 superuser.save()
+
+            if not Service.objects.all().exists():
+                for role, unused in ROLE_CHOICES:
+                    Service.get_or_create_dummy(role)

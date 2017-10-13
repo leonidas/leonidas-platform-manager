@@ -1,4 +1,5 @@
 import os
+from email.utils import parseaddr
 
 import environ
 
@@ -19,6 +20,7 @@ from .settings_defaults import (
 
 
 __all__ = [
+    'ADMINS',
     'ALLOWED_HOSTS',
     'AUTH_PASSWORD_VALIDATORS',
     'AUTHENTICATION_BACKENDS',
@@ -42,14 +44,16 @@ __all__ = [
 
 env = environ.Env()
 
-
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 DEBUG = env.bool('DEBUG', default=False)
-SECRET_KEY = env('SECRET_KEY', default='secret' if DEBUG else '')
+
+ADMINS = [parseaddr(addr) for addr in env('ADMINS', default='').split(',') if addr]
 ALLOWED_HOSTS = env('ALLOWED_HOSTS', default='*' if DEBUG else '').split()
-DATABASES = dict(default=env.db('DATABASE_URL', default='sqlite:///manager.sqlite3'))
-TIME_ZONE = env('TZ', default='Europe/Helsinki')
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATABASES = dict(default=env.db('DATABASE_URL', default='psql://'))
+MANAGERS = ADMINS
+SECRET_KEY = env('SECRET_KEY', default='secret' if DEBUG else '')
 SOCIAL_AUTH_GITHUB_ORG_KEY = env('GITHUB_KEY', default='')
-SOCIAL_AUTH_GITHUB_ORG_SECRET = env('GITHUB_SECRET', default='')
 SOCIAL_AUTH_GITHUB_ORG_NAME = env('GITHUB_ORG_NAME', default='')
+SOCIAL_AUTH_GITHUB_ORG_SECRET = env('GITHUB_SECRET', default='')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+TIME_ZONE = env('TZ', default='Europe/Helsinki')
