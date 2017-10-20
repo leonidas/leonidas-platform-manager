@@ -18,6 +18,7 @@ ROLE_GUESSES = dict(
     worker='worker',
     api='backend',
     frontend='frontend',
+    web='backend',
 )
 
 DEFAULT_ROLE = 'backend'

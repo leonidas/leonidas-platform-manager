@@ -1,0 +1,71 @@
+stack: 'santtu_pajukanta_leonidas/leonidas-platform-manager'
+version: '1.0.0'
+
+variables:
+  postgres_hostname:
+    type: string
+    default: plat2-postgres.c6locwliadks.eu-central-1.rds.amazonaws.com
+    from:
+      vault: ${STACK}_postgres_hostname
+    to:
+      vault: ${STACK}_postgres_hostname
+  postgres_username:
+    type: string
+    default: ${STACK}
+    from:
+      vault: ${STACK}_postgres_username
+    to:
+      vault: ${STACK}_postgres_username
+  postgres_database:
+    type: string
+    default: ${STACK}
+    from:
+      vault: ${STACK}_postgres_database
+    to:
+      vault: ${STACK}_postgres_database
+  postgres_password:
+    type: string
+    from:
+      vault: ${STACK}_postgres_password
+      random_string: 63
+    to:
+      vault: ${STACK}_postgres_password
+  public_hostname:
+    type: string
+    default: ${STACK}.leonidasoy.fi
+    from:
+      vault: ${STACK}_public_hostname
+    to:
+      vault: ${STACK}_public_hostname
+  secret_key:
+    type: string
+    from:
+      vault: ${STACK}_secret_key
+      random_string: 127
+    to:
+      vault: ${STACK}_secret_key
+
+services:
+  web:
+    image: registry.plat2.leonidasoy.fi/leonidas-platform-manager
+    command: gunicorn --bind=0.0.0.0:8000 --workers=4 manager_site.wsgi:application
+    links:
+      - memcache
+      - platform/lb1
+    environment:
+      PYTHONUNBUFFERED: 1
+      DATABASE_URL: psql://${postgres_username}:${postgres_password}@${postgres_hostname}/${postgres_database}
+      ALLOWED_HOSTS: ${public_hostname}
+      CACHE_URL: memcache://memcache
+      SECRET_KEY: ${secret_key}
+
+      KONTENA_LB_MODE: http
+      KONTENA_LB_BALANCE: roundrobin
+      KONTENA_LB_INTERNAL_PORT: 8000
+      KONTENA_LB_VIRTUAL_HOSTS: ${public_hostname}
+      KONTENA_LB_CUSTOM_SETTINGS: |
+        redirect scheme https if !{ ssl_fc }
+        http-response set-header Strict-Transport-Security max-age=16000000;\ includeSubDomains;\ preload;
+
+  memcache:
+    image: memcached
