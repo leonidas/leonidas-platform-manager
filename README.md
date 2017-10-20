@@ -13,3 +13,8 @@ Answers questions such as
     docker-compose up
 
 Open http://localhost:8000 in your browser. Username is `admin`, password is `secret`.
+
+Running tests:
+
+    alias dc-test="docker-compose --file=docker-compose.test.yml up --abort-on-container-exit --exit-code-from=test"
+    dc-test

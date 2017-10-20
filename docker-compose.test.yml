@@ -1,12 +1,10 @@
 version: '2.2'
 services:
-  web:
+  test:
     build: .
     init: true
     image: registry.plat2.leonidasoy.fi/leonidas-platform-manager
-    command: scripts/wait-for-it.sh --strict postgres:5432 -- python manage.py docker_start
-    ports:
-      - 8000:8000
+    command: scripts/wait-for-it.sh --strict postgres:5432 -- pytest
     links:
       - postgres
       - memcache

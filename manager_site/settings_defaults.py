@@ -1,3 +1,6 @@
+import os
+
+
 __all__ = [
     'AUTH_PASSWORD_VALIDATORS',
     'INSTALLED_APPS',
@@ -11,6 +14,10 @@ __all__ = [
     'USE_TZ',
     'WSGI_APPLICATION',
 ]
+
+
+def mkpath(*parts):
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), '..', *parts))
 
 
 INSTALLED_APPS = [
@@ -39,7 +46,9 @@ ROOT_URLCONF = 'manager_site.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            mkpath('manager_site', 'templates'),
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
