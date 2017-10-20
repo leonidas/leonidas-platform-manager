@@ -7,10 +7,16 @@ TYPE_CHOICES = [
     ('kontena', 'Kontena Grid'),
     ('aws-ess', 'AWS ElasticSearch Service'),
     ('aws-rds', 'AWS RDS'),
+    ('bunch', 'Just a bunch of nodes'),
 ]
 
 
 class Grid(models.Model):
+    """
+    A Grid is a collection of Nodes. It may or may not use some fancy cluster management software,
+    such as Kontena.
+    """
+
     slug = models.CharField(unique=True, **CommonFields.slug)
     name = models.CharField(max_length=255)
     description = models.TextField()
@@ -29,7 +35,9 @@ class Grid(models.Model):
 
     @classmethod
     def get_or_create_dummy(cls):
-        return cls.objects.get_or_create(
+        from .node import Node
+
+        grid, created = cls.objects.get_or_create(
             slug='plat2-grid',
             defaults=dict(
                 name='Plat2',
@@ -37,3 +45,12 @@ class Grid(models.Model):
                 type='kontena',
             )
         )
+
+        for node_name in [
+            'spring-butterfly-50',
+            'muddy-rain-28',
+            'autumn-river-15',
+        ]:
+            Node.get_or_create_dummy(name=node_name, grid=grid)
+
+        return grid, created

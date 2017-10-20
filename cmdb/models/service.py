@@ -13,12 +13,6 @@ ROLE_CHOICES = [
 ]
 
 
-ENVIRONMENT_CHOICES = [
-    ('staging', 'Staging'),
-    ('production', 'Production'),
-]
-
-
 DUMMY_DEFAULTS_BY_ROLE = dict(
     backend=dict(
         name='Backend',
@@ -48,21 +42,15 @@ DUMMY_DEFAULTS_BY_ROLE = dict(
 
 
 class Service(models.Model):
-    project = models.ForeignKey('cmdb.Project', related_name='projects')
+    stack = models.ForeignKey('cmdb.Stack', related_name='services')
     name = models.CharField(max_length=255)
     slug = models.CharField(**CommonFields.slug)
     canonical_name = models.CharField(unique=True, **CommonFields.slug)
 
-    grid = models.ForeignKey('cmdb.Grid', blank=True, related_name='services')
     role = models.CharField(
         max_length=max(len(key) for (key, label) in ROLE_CHOICES),
         choices=ROLE_CHOICES,
         default=ROLE_CHOICES[0][0],
-    )
-    environment = models.CharField(
-        max_length=max(len(key) for (key, label) in ENVIRONMENT_CHOICES),
-        choices=ENVIRONMENT_CHOICES,
-        default=ENVIRONMENT_CHOICES[0][0],
     )
 
     hostname = models.CharField(max_length=255, blank=True)
@@ -74,27 +62,37 @@ class Service(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = [('project', 'slug')]
+        unique_together = [('stack', 'slug')]
 
     def __str__(self):
         return self.name
 
+    @property
+    def project(self):
+        return self.stack.project if self.stack else None
+
+    def admin_get_project(self):
+        return self.project
+    admin_get_project.short_description = 'Project'
+    admin_get_project.admin_order_field = 'stack__project'
+
+    @property
+    def customer(self):
+        return self.project.customer if self.project else None
+
+    def admin_get_customer(self):
+        return self.customer
+    admin_get_customer.short_description = 'Customer'
+    admin_get_customer.admin_order_field = 'stack__project__customer'
+
     @classmethod
     def get_or_create_dummy(cls, role='backend'):
-        from .project import Project
-        from .grid import Grid
+        from .stack import Stack
 
-        project, unused = Project.get_or_create_dummy()
-        grid, unused = Grid.get_or_create_dummy()
-
-        defaults = dict(
-            grid=grid,
-            **DUMMY_DEFAULTS_BY_ROLE[role]
-        )
+        stack, unused = Stack.get_or_create_dummy()
 
         return cls.objects.get_or_create(
-            project=project,
+            stack=stack,
             role=role,
-            defaults=defaults,
-            environment='production',
+            defaults=DUMMY_DEFAULTS_BY_ROLE[role],
         )

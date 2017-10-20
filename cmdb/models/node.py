@@ -10,7 +10,7 @@ ROLE_CHOICES = [
 
 
 class Node(models.Model):
-    grid = models.ForeignKey('cmdb.Node', related_name='nodes')
+    grid = models.ForeignKey('cmdb.Grid', related_name='nodes')
     paid_for_by = models.ForeignKey('cmdb.Customer', related_name='nodes')
 
     hostname = models.CharField(max_length=255, unique=True)
@@ -28,15 +28,17 @@ class Node(models.Model):
         return self.hostname
 
     @classmethod
-    def get_or_create_dummy(cls):
+    def get_or_create_dummy(cls, name='restless-haze-25', grid=None):
         from .customer import Customer
         from .grid import Grid
 
         paid_for_by, unused = Customer.get_or_create_dummy()
-        grid, unused = Grid.get_or_create_dummy()
+
+        if grid is None:
+            grid, unused = Grid.get_or_create_dummy()
 
         return cls.objects.get_or_create(
-            hostname='restless-haze-25.plat2.leonidasoy.fi',
+            hostname=f'{name}.plat2.leonidasoy.fi',
             defaults=dict(
                 grid=grid,
                 paid_for_by=paid_for_by,

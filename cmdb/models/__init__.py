@@ -3,12 +3,15 @@ Infrastructure hierarchy:
 
 * Grid
     * Node
+    * Stack
+        * Service
 
-Service hierarchy:
+Project hierarchy:
 
 * Customer
     * Project
-        * Service
+        * Stack
+            * Service
 """
 
 
@@ -17,6 +20,7 @@ from .grid import Grid
 from .node import Node
 from .project import Project
 from .service import Service
+from .stack import Stack
 
 
 __all__ = [
@@ -25,4 +29,5 @@ __all__ = [
     'Node',
     'Project',
     'Service',
+    'Stack',
 ]

@@ -1,7 +1,7 @@
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
-from .models import Customer, Grid, Project, Service
+from .models import Customer, Grid, Project, Service, Stack
 from .utils import slugify
 
 
@@ -9,6 +9,7 @@ for model in [
     Customer,
     Grid,
     Project,
+    Stack,
     Service,
 ]:
     @receiver(pre_save, sender=model, weak=False)
@@ -19,5 +20,5 @@ for model in [
 
 @receiver(pre_save, sender=Service)
 def set_canonical_name(sender, instance, **kwargs):
-    if instance.slug and instance.project and instance.project.slug and not instance.canonical_name:
-        instance.canonical_name = f'{instance.project.slug}/{instance.slug}'
+    if instance.slug and instance.stack and instance.stack.slug and not instance.canonical_name:
+        instance.canonical_name = f'{instance.stack.slug}/{instance.slug}'
