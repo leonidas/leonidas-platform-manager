@@ -21,9 +21,11 @@ from .node import Node
 from .project import Project
 from .service import Service
 from .stack import Stack
+from .account import Account
 
 
 __all__ = [
+    'Account',
     'Customer',
     'Grid',
     'Node',

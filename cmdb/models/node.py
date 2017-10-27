@@ -10,8 +10,12 @@ ROLE_CHOICES = [
 
 
 class Node(models.Model):
+    """
+    A Node is a virtual or physical server that runs one or more Services.
+    """
     grid = models.ForeignKey('cmdb.Grid', related_name='nodes')
     paid_for_by = models.ForeignKey('cmdb.Customer', related_name='nodes')
+    account = models.ForeignKey('cmdb.Account', related_name='accounts', null=True, blank=True)
 
     hostname = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True)
@@ -29,10 +33,12 @@ class Node(models.Model):
 
     @classmethod
     def get_or_create_dummy(cls, name='restless-haze-25', grid=None):
+        from .account import Account
         from .customer import Customer
         from .grid import Grid
 
         paid_for_by, unused = Customer.get_or_create_dummy()
+        account, unused = Account.get_or_create_dummy()
 
         if grid is None:
             grid, unused = Grid.get_or_create_dummy()
